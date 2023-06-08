@@ -1,5 +1,34 @@
 # adapt-migrations
 
+### Commands API
+https://github.com/cgkineo/adapt-migrations/blob/master/api/commands.js
+* `capture({ cwd, data, fromPlugins })` - captures current plugins and data
+* `migrate({ cwd, toPlugins })` - migrates data from capture to new plugins
+* `test({ cwd })` - tests the migrations with dummy data
+
+### Migration script API
+Functions:
+* `describe(description, describeFunction)` Describe a migration
+* `whereData(description, dataFilterFunction)` Limit when the migration runs, return true/false/throw Error
+* `whereFromPlugin(description, fromPluginFilterFunction)` Limit when the migration runs, return true/false/throw Error
+* `whereToPlugin(description, toPluginFilterFunction)` Limit when the migration runs, return true/false/throw Error
+* `checkData(dataFunction)` Check data, return true/false/throw Error
+* `mutateData(dataFunction)` Change data, return true/false/throw Error
+* `throwError(description)` Throw an error
+* `testSuccessWhere({ fromPlugins, toPlugins, data })` Supply some tests data which should end in success
+* `testStopWhere({ fromPlugins, toPlugins, data })` Supply some tests data which should end prematurely
+* `testErrorWhere({ fromPlugins, toPlugins, data })` Supply some tests data which will trigger an error
+
+Arguments:
+* `describeFunction = () => {}` Function body has a collection of migration script functions
+* `dataFilterFunction = data => {}` Function body should return true/false/throw Error
+* `fromPluginFilterFunction = fromPlugins => {}` Function body should return true/false/throw Error
+* `toPluginFilterFunction = toPlugins => {}` Function body should return true/false/throw Error
+* `dataFunction = data => { }` Function body should mutate or check the data, returning true/false/throw Error
+* `fromPlugins = [{ name: 'quickNav , version: '1.0.0' }]` Test data describing the original plugins
+* `toPlugins = [{ name: 'pageNav , version: '1.0.0' }]` Test data describing the destination plugins
+* `data = [{ _id: 'c-05, ... }]` Test data for the course content
+
 ### Example migration script
 ```js
 import { describe, whereData, whereFromPlugin, whereToPlugin, mutateData, checkData, throwError, ifErroredAsk, testSuccessWhere, testErrorWhere, testStopWhere } from 'adapt-migrations';
@@ -113,7 +142,7 @@ module.exports = function(grunt) {
 };
 ```
 ```sh
-grunt migration:capture # captures the json and plugins
-grunt migration:migrate # applies the migrations once all of the plugins are updated
-grunt migration:test # runs the migration test cases
+grunt migration:capture # captures current plugins and data
+grunt migration:migrate # migrates data from capture to new plugins
+grunt migration:test # tests the migrations with dummy data
 ```
