@@ -112,3 +112,8 @@ module.exports = function(grunt) {
 
 };
 ```
+```sh
+grunt migration:capture # captures the json and plugins
+grunt migration:migrate # applies the migrations once all of the plugins are updated
+grunt migration:test # runs the migration test cases
+```
