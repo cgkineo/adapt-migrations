@@ -1,6 +1,6 @@
 # adapt-migrations
 
-
+### Example migration script
 ```js
 import { describe, whereData, whereFromPlugin, whereToPlugin, mutateData, checkData, throwError, ifErroredAsk, testSuccessWhere, testErrorWhere, testStopWhere } from 'adapt-migrations';
 
@@ -74,4 +74,41 @@ describe('where quicknav is weirdly configured', async () => {
   });
   throwError('this is an error');
 });
+```
+
+### Example grunt task
+```js
+module.exports = function(grunt) {
+
+  const Helpers = require('../helpers')(grunt);
+
+  grunt.registerTask('migration', 'Migrate from on verion to another', function(mode) {
+    const next = this.async();
+    (async function() {
+      const migrations = await import('adapt-migrations');
+      const framework = Helpers.getFramework();
+      grunt.log.ok(`Using ${framework.useOutputData ? framework.outputPath : framework.sourcePath} folder for course data...`);
+
+      const plugins = framework.getPlugins().getAllPackageJSONFileItems().map(fileItem => fileItem.item);
+
+      if (mode === 'capture') {
+        // TODO: capture all languages and not just the first
+        const data = framework.getData().languages[0].getAllFileItems().map(fileItem => fileItem.item);
+        await migrations.capture({ data, fromPlugins: plugins });
+        return next();
+      }
+
+      if (mode === 'migrate') {
+        await migrations.migrate({ toPlugins: plugins });
+        return next();
+      }
+
+      if (mode === 'test') {
+        await migrations.test();
+        return next();
+      }
+    })();
+  });
+
+};
 ```
