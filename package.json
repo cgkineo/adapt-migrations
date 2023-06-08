@@ -1,0 +1,5 @@
+{
+  "name": "adapt-migrations",
+  "type":"module",
+  "main": "index.js"
+}
