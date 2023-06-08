@@ -9,8 +9,8 @@ describe('add "ollie" to displayTitle where exists', async () => {
     return data.some(({ displayTitle }) => displayTitle);
   });
   mutateData('change displayTitle', async data => {
-    const quicknavs = data.filter(({ displayTitle }) => displayTitle);
-    quicknavs.forEach(item => (item.displayTitle += ' ollie'));
+    const itemsWithDisplayTitle = data.filter(({ displayTitle }) => displayTitle);
+    itemsWithDisplayTitle.forEach(item => (item.displayTitle += ' ollie'));
     return true;
   });
   checkData('check everything is ok', async data => {
@@ -82,7 +82,7 @@ module.exports = function(grunt) {
 
   const Helpers = require('../helpers')(grunt);
 
-  grunt.registerTask('migration', 'Migrate from on verion to another', function(mode) {
+  grunt.registerTask('migration', 'Migrate from one verion to another', function(mode) {
     const next = this.async();
     (async function() {
       const migrations = await import('adapt-migrations');
