@@ -16,8 +16,8 @@ Functions:
 * `whereData(description, dataFilterFunction)` Limit when the migration runs, return true/false/throw Error
 * `whereFromPlugin(description, fromPluginFilterFunction)` Limit when the migration runs, return true/false/throw Error
 * `whereToPlugin(description, toPluginFilterFunction)` Limit when the migration runs, return true/false/throw Error
-* `checkData(dataFunction)` Check data, return true/false/throw Error
 * `mutateData(dataFunction)` Change data, return true/false/throw Error
+* `checkData(dataFunction)` Check data, return true/false/throw Error
 * `throwError(description)` Throw an error
 * `testSuccessWhere({ fromPlugins, toPlugins, data })` Supply some tests data which should end in success
 * `testStopWhere({ fromPlugins, toPlugins, data })` Supply some tests data which should end prematurely
