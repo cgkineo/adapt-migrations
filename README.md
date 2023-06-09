@@ -5,6 +5,7 @@ https://github.com/cgkineo/adapt-migrations/issues/1
 
 ### Commands API
 https://github.com/cgkineo/adapt-migrations/blob/master/api/commands.js
+* `load({ cwd, cachePath, scripts })` - loads all migration tasks
 * `capture({ cwd, data, fromPlugins })` - captures current plugins and data
 * `migrate({ cwd, toPlugins })` - migrates data from capture to new plugins
 * `test({ cwd })` - tests the migrations with dummy data
@@ -15,8 +16,8 @@ Functions:
 * `whereData(description, dataFilterFunction)` Limit when the migration runs, return true/false/throw Error
 * `whereFromPlugin(description, fromPluginFilterFunction)` Limit when the migration runs, return true/false/throw Error
 * `whereToPlugin(description, toPluginFilterFunction)` Limit when the migration runs, return true/false/throw Error
-* `checkData(dataFunction)` Check data, return true/false/throw Error
 * `mutateData(dataFunction)` Change data, return true/false/throw Error
+* `checkData(dataFunction)` Check data, return true/false/throw Error
 * `throwError(description)` Throw an error
 * `testSuccessWhere({ fromPlugins, toPlugins, data })` Supply some tests data which should end in success
 * `testStopWhere({ fromPlugins, toPlugins, data })` Supply some tests data which should end prematurely
