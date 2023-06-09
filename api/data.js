@@ -11,7 +11,10 @@ export function mutateData(description, callback) {
 export function checkData(description, callback) {
   return deferOrRunWrap(function(context) {
     return successStopOrErrorWrap('checkData', description, async () => {
-      return callback(context.data);
+      context.journal.freeze();
+      const result = await callback(context.data);
+      context.journal.unfreeze();
+      return result;
     });
   }, { description, type: 'action' });
 };
