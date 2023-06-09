@@ -5,6 +5,7 @@ https://github.com/cgkineo/adapt-migrations/issues/1
 
 ### Commands API
 https://github.com/cgkineo/adapt-migrations/blob/master/api/commands.js
+* `load({ cwd, cachePath, scripts })` - loads all migration tasks
 * `capture({ cwd, data, fromPlugins })` - captures current plugins and data
 * `migrate({ cwd, toPlugins })` - migrates data from capture to new plugins
 * `test({ cwd })` - tests the migrations with dummy data
