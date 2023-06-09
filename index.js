@@ -1,4 +1,5 @@
 import {
+  load,
   capture,
   migrate,
   test
@@ -24,8 +25,11 @@ import {
   testStopWhere,
   testSuccessWhere
 } from './api/tests.js'
+import Journal from './lib/Journal.js'
+import CacheManager from './lib/CacheManager.js'
 
 export {
+  load,
   capture,
   migrate,
   test,
@@ -39,5 +43,7 @@ export {
   throwError,
   testErrorWhere,
   testStopWhere,
-  testSuccessWhere
+  testSuccessWhere,
+  Journal,
+  CacheManager
 };

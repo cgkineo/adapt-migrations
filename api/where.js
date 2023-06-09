@@ -4,7 +4,7 @@ import { deferOrRunWrap, successStopOrErrorWrap } from '../lib/lifecycle.js'
 export function whereData(description, callback) {
   return deferOrRunWrap(async function(context) {
     return successStopOrErrorWrap('whereData', description, async () => {
-      return await callback(context.data);
+      return callback(context.data);
     });
   }, { description, type: 'where' });
 };
