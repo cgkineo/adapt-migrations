@@ -37,12 +37,12 @@ Arguments:
 import { describe, whereData, whereFromPlugin, whereToPlugin, mutateData, checkData, throwError, ifErroredAsk, testSuccessWhere, testErrorWhere, testStopWhere } from 'adapt-migrations';
 
 describe('add "ollie" to displayTitle where exists', async () => {
-  whereData('has configured displayTitles', async data => {
-    return data.some(({ displayTitle }) => displayTitle);
-  });
+  whereData('has configured displayTitles', async data =>
+    data.some(({ displayTitle }) => displayTitle)
+  );
   mutateData('change displayTitle', async data => {
-    const itemsWithDisplayTitle = data.filter(({ displayTitle }) => displayTitle);
-    itemsWithDisplayTitle.forEach(item => (item.displayTitle += ' ollie'));
+    const quicknavs = data.filter(({ displayTitle }) => displayTitle);
+    quicknavs.forEach(item => (item.displayTitle += ' ollie'));
     return true;
   });
   checkData('check everything is ok', async data => {
@@ -55,9 +55,9 @@ describe('add "ollie" to displayTitle where exists', async () => {
 describe('quicknav to pagenav', async () => {
   whereFromPlugin('quicknav v1.0.0', { name: 'quicknav', version: '1.0.0' });
   whereToPlugin('pagenav v1.0.0', { name: 'pagenav', version: '1.0.0' });
-  whereData('has configured quicknavs', async data => {
-    return data.some(({ _component }) => _component === 'quicknav');
-  });
+  whereData('has configured quicknavs', async data =>
+    data.some(({ _component }) => _component === 'quicknav')
+  );
   mutateData('change _component name', async data => {
     const quicknavs = data.filter(({ _component }) => _component === 'quicknav');
     quicknavs.forEach(item => (item._component = 'pagenav'));
@@ -113,25 +113,62 @@ describe('where quicknav is weirdly configured', async () => {
 module.exports = function(grunt) {
 
   const Helpers = require('../helpers')(grunt);
+  const globs = require('globs');
+  const path = require('path');
+  const fs = require('fs-extra');
 
-  grunt.registerTask('migration', 'Migrate from one verion to another', function(mode) {
+  grunt.registerTask('migration', 'Migrate from on verion to another', function(mode) {
     const next = this.async();
+    const buildConfig = Helpers.generateConfigData();
+
     (async function() {
       const migrations = await import('adapt-migrations');
+
+      const cache = new migrations.CacheManager();
+      const cachePath = cache.cachePath({
+        outputPath: buildConfig.outputdir
+      });
+
       const framework = Helpers.getFramework();
       grunt.log.ok(`Using ${framework.useOutputData ? framework.outputPath : framework.sourcePath} folder for course data...`);
 
       const plugins = framework.getPlugins().getAllPackageJSONFileItems().map(fileItem => fileItem.item);
+      const cwd = process.cwd();
+      const migrationScripts = await new Promise(resolve => {
+        globs([
+          '*/*/migrations/**/*.js',
+          'core/migrations/**/*.js'
+        ], { cwd: path.join(cwd, './src/'), absolute: true }, (err, files) => resolve(err ? null : files));
+      });
+
+      await migrations.load({
+        cachePath,
+        scripts: migrationScripts
+      });
 
       if (mode === 'capture') {
         // TODO: capture all languages and not just the first
         const data = framework.getData().languages[0].getAllFileItems().map(fileItem => fileItem.item);
-        await migrations.capture({ data, fromPlugins: plugins });
+        const captured = await migrations.capture({ data, fromPlugins: plugins });
+        const outputPath = path.join(cwd, './migrations/');
+        if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath);
+        const outputFile = path.join(outputPath, 'capture.json');
+        fs.writeJSONSync(outputFile, captured);
         return next();
       }
 
       if (mode === 'migrate') {
-        await migrations.migrate({ toPlugins: plugins });
+        const Journal = migrations.Journal;
+        const outputPath = path.join(cwd, './migrations/');
+        if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath);
+        const outputFile = path.join(outputPath, 'capture.json');
+        const { data, fromPlugins } = fs.readJSONSync(outputFile);
+        const journal = new Journal({
+          data
+        });
+        await migrations.migrate({ journal, fromPlugins, toPlugins: plugins });
+        // TODO: add options to rollback on any error, to default fail silently or to default terminate
+        console.log(journal.entries);
         return next();
       }
 
@@ -139,10 +176,13 @@ module.exports = function(grunt) {
         await migrations.test();
         return next();
       }
+
+      return next();
     })();
   });
 
 };
+
 ```
 ```sh
 grunt migration:capture # captures current plugins and data
