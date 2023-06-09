@@ -121,6 +121,7 @@ module.exports = function(grunt) {
   grunt.registerTask('migration', 'Migrate from on verion to another', function(mode) {
     const next = this.async();
     const buildConfig = Helpers.generateConfigData();
+    const fileNameIncludes = grunt.option('file');
 
     (async function() {
       const migrations = await import('adapt-migrations');
@@ -135,11 +136,14 @@ module.exports = function(grunt) {
 
       const plugins = framework.getPlugins().getAllPackageJSONFileItems().map(fileItem => fileItem.item);
       const cwd = process.cwd();
-      const migrationScripts = await new Promise(resolve => {
+      const migrationScripts = Array.from(await new Promise(resolve => {
         globs([
           '*/*/migrations/**/*.js',
           'core/migrations/**/*.js'
         ], { cwd: path.join(cwd, './src/'), absolute: true }, (err, files) => resolve(err ? null : files));
+      })).filter(filePath => {
+        if (!fileNameIncludes) return true;
+        return filePath.includes(fileNameIncludes);
       });
 
       await migrations.load({
@@ -197,4 +201,5 @@ module.exports = function(grunt) {
 grunt migration:capture # captures current plugins and data
 grunt migration:migrate # migrates data from capture to new plugins
 grunt migration:test # tests the migrations with dummy data
+grunt migration:test --file=adapt-contrib-text/migrations/text.js # tests the migrations with dummy data
 ```
