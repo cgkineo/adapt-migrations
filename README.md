@@ -165,7 +165,15 @@ module.exports = function(grunt) {
         const outputFile = path.join(outputPath, 'capture.json');
         const { data, fromPlugins } = fs.readJSONSync(outputFile);
         const journal = new Journal({
-          data
+          data,
+          supplementEntry: (entry, data) => {
+            entry._id = data[entry.keys[0]]?._id ?? '';
+            entry._type = data[entry.keys[0]]?._type ?? '';
+            if (entry._type && data[entry.keys[0]]?.[`_${entry._type}`]) {
+              entry[`_${entry._type}`] = data[entry.keys[0]]?.[`_${entry._type}`] ?? '';
+            }
+            return entry;
+          }
         });
         await migrations.migrate({ journal, fromPlugins, toPlugins: plugins });
         // TODO: add options to rollback on any error, to default fail silently or to default terminate
