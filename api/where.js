@@ -1,46 +1,46 @@
-import semver from 'semver';
+import semver from 'semver'
 import { deferOrRunWrap, successStopOrErrorWrap } from '../lib/lifecycle.js'
 
-export function whereData(description, callback) {
-  return deferOrRunWrap(async function(context) {
+export function whereData (description, callback) {
+  return deferOrRunWrap(async context => {
     return successStopOrErrorWrap('whereData', description, async () => {
-      return callback(context.data);
-    });
-  }, { description, type: 'where' });
+      return callback(context.data)
+    })
+  }, { description, type: 'where' })
 };
 
-export function whereFromPlugin(description, callbackOrConfig) {
-  return deferOrRunWrap(function({ fromPlugins }) {
+export function whereFromPlugin (description, callbackOrConfig) {
+  return deferOrRunWrap(({ fromPlugins }) => {
     return successStopOrErrorWrap('whereFromPlugin', description, async () => {
-      const isCallback = (typeof callbackOrConfig === 'function');
+      const isCallback = (typeof callbackOrConfig === 'function')
       if (isCallback) {
-        const callback = callbackOrConfig;
-        return callback(fromPlugins);
+        const callback = callbackOrConfig
+        return callback(fromPlugins)
       }
-      const config = callbackOrConfig;
+      const config = callbackOrConfig
       return fromPlugins.some(plugin => {
-        if (config.name && plugin.name !== config.name) return false;
-        if (config.version && !semver.satisfies(plugin.version, config.version)) return false;
-        return true;
-      });
-    });
-  }, { description, type: 'where' });
+        if (config.name && plugin.name !== config.name) return false
+        if (config.version && !semver.satisfies(plugin.version, config.version)) return false
+        return true
+      })
+    })
+  }, { description, type: 'where' })
 };
 
-export function whereToPlugin(description, callbackOrConfig) {
-  return deferOrRunWrap(function({ toPlugins }) {
+export function whereToPlugin (description, callbackOrConfig) {
+  return deferOrRunWrap(({ toPlugins }) => {
     return successStopOrErrorWrap('whereToPlugin', description, async () => {
-      const isCallback = (typeof callbackOrConfig === 'function');
+      const isCallback = (typeof callbackOrConfig === 'function')
       if (isCallback) {
-        const callback = callbackOrConfig;
-        return callback(toPlugins);
+        const callback = callbackOrConfig
+        return callback(toPlugins)
       }
-      const config = callbackOrConfig;
+      const config = callbackOrConfig
       return toPlugins.some(plugin => {
-        if (config.name && plugin.name !== config.name) return false;
-        if (config.version && !semver.satisfies(plugin.version, config.version)) return false;
-        return true;
+        if (config.name && plugin.name !== config.name) return false
+        if (config.version && !semver.satisfies(plugin.version, config.version)) return false
+        return true
       })
-    });
-  }, { description, type: 'where' });
+    })
+  }, { description, type: 'where' })
 };

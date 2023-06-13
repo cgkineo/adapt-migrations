@@ -46,4 +46,4 @@ export {
   testSuccessWhere,
   Journal,
   CacheManager
-};
+}

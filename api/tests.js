@@ -1,13 +1,13 @@
-import TaskTest from '../lib/TaskTest.js';
+import TaskTest from '../lib/TaskTest.js'
 import { deferOrRunWrap } from '../lib/lifecycle.js'
 
-export function testSuccessWhere(description, {
+export function testSuccessWhere (description, {
   fromPlugins,
   toPlugins,
   data
 }) {
-  return deferOrRunWrap(function(context) {
-    console.log('testSuccessWhere:', description);
+  return deferOrRunWrap(() => {
+    console.log('testSuccessWhere:', description)
     return new TaskTest({
       description,
       shouldRun: true,
@@ -15,16 +15,16 @@ export function testSuccessWhere(description, {
       toPlugins,
       data
     })
-  }, { type: 'test' });
+  }, { type: 'test' })
 };
 
-export function testStopWhere(description, {
+export function testStopWhere (description, {
   fromPlugins,
   toPlugins,
   data
 }) {
-  return deferOrRunWrap(function(context) {
-    console.log('testStopWhere:', description);
+  return deferOrRunWrap(() => {
+    console.log('testStopWhere:', description)
     return new TaskTest({
       description,
       shouldStop: true,
@@ -33,16 +33,16 @@ export function testStopWhere(description, {
       toPlugins,
       data
     })
-  }, { type: 'test' });
+  }, { type: 'test' })
 };
 
-export function testErrorWhere(description, {
+export function testErrorWhere (description, {
   fromPlugins,
   toPlugins,
   data
 }) {
-  return deferOrRunWrap(function(context) {
-    console.log('testErrorWhere:', description);
+  return deferOrRunWrap(() => {
+    console.log('testErrorWhere:', description)
     return new TaskTest({
       description,
       shouldError: true,
@@ -50,5 +50,5 @@ export function testErrorWhere(description, {
       toPlugins,
       data
     })
-  }, { type: 'test' });
+  }, { type: 'test' })
 };
