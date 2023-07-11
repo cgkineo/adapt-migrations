@@ -29,10 +29,12 @@ import Journal from './lib/Journal.js'
 import CacheManager from './lib/CacheManager.js'
 
 export {
+  // commands
   load,
   capture,
   migrate,
   test,
+  // migration script api
   describe,
   whereData,
   whereFromPlugin,
@@ -44,6 +46,7 @@ export {
   testErrorWhere,
   testStopWhere,
   testSuccessWhere,
+  // environment objects
   Journal,
   CacheManager
 }
