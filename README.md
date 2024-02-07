@@ -199,6 +199,7 @@ module.exports = function(grunt) {
 ```
 ```sh
 grunt migration:capture # captures current plugins and data
+# do plugin/fw updates
 grunt migration:migrate # migrates data from capture to new plugins
 grunt migration:test # tests the migrations with dummy data
 grunt migration:test --file=adapt-contrib-text/migrations/text.js # tests the migrations with dummy data
