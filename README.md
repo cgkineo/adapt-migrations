@@ -127,7 +127,7 @@ module.exports = function(grunt) {
       const migrations = await import('adapt-migrations');
 
       const cache = new migrations.CacheManager();
-      const cachePath = cache.cachePath({
+      const cachePath = await cache.getCachePath({
         outputPath: buildConfig.outputdir
       });
 
