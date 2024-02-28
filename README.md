@@ -175,10 +175,10 @@ module.exports = function(grunt) {
         const languagesFile = path.join(outputPath, 'captureLanguages.json');
         const languages = fs.readJSONSync(languagesFile);
 
-        for (let i = 0; i < languages.length; i++) {
+        for (const language of languages) {
           const Journal = migrations.Journal;
           if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath);
-          const outputFile = path.join(outputPath, `capture_${languages[i]}.json`);
+          const outputFile = path.join(outputPath, `capture_${language}.json`);
           const { data, fromPlugins, originalFromPlugins } = fs.readJSONSync(outputFile);
           const journal = new Journal({
             data,
