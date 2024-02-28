@@ -126,16 +126,18 @@ module.exports = function(grunt) {
     (async function() {
       const migrations = await import('adapt-migrations');
 
+      const cwd = process.cwd();
+      const outputPath = path.join(cwd, './migrations/');
       const cache = new migrations.CacheManager();
       const cachePath = await cache.getCachePath({
-        outputPath: buildConfig.outputdir
+        outputPath: buildConfig.outputdir,
+        tempPath: outputPath
       });
 
       const framework = Helpers.getFramework();
       grunt.log.ok(`Using ${framework.useOutputData ? framework.outputPath : framework.sourcePath} folder for course data...`);
 
       const plugins = framework.getPlugins().getAllPackageJSONFileItems().map(fileItem => fileItem.item);
-      const cwd = process.cwd();
       const migrationScripts = Array.from(await new Promise(resolve => {
         globs([
           '*/*/migrations/**/*.js',
@@ -153,35 +155,47 @@ module.exports = function(grunt) {
 
       if (mode === 'capture') {
         // TODO: capture all languages and not just the first
-        const data = framework.getData().languages[0].getAllFileItems().map(fileItem => fileItem.item);
-        const captured = await migrations.capture({ data, fromPlugins: plugins });
-        const outputPath = path.join(cwd, './migrations/');
         if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath);
-        const outputFile = path.join(outputPath, 'capture.json');
-        fs.writeJSONSync(outputFile, captured);
+        const languages = framework.getData().languages.map((language) => language.name);
+        const languageFile = path.join(outputPath, 'captureLanguages.json');
+        fs.writeJSONSync(languageFile, languages);
+
+        languages.forEach(async (language, index) => {
+          const data = framework.getData().languages[index].getAllFileItems().map(fileItem => fileItem.item);
+          const captured = await migrations.capture({ data, fromPlugins: plugins });
+          const outputFile = path.join(outputPath, `capture_${language}.json`);
+          fs.writeJSONSync(outputFile, captured);
+        });
+
         return next();
       }
 
       if (mode === 'migrate') {
-        const Journal = migrations.Journal;
-        const outputPath = path.join(cwd, './migrations/');
-        if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath);
-        const outputFile = path.join(outputPath, 'capture.json');
-        const { data, fromPlugins } = fs.readJSONSync(outputFile);
-        const journal = new Journal({
-          data,
-          supplementEntry: (entry, data) => {
-            entry._id = data[entry.keys[0]]?._id ?? '';
-            entry._type = data[entry.keys[0]]?._type ?? '';
-            if (entry._type && data[entry.keys[0]]?.[`_${entry._type}`]) {
-              entry[`_${entry._type}`] = data[entry.keys[0]]?.[`_${entry._type}`] ?? '';
+
+        const languagesFile = path.join(outputPath, 'captureLanguages.json');
+        const languages = fs.readJSONSync(languagesFile);
+
+        for (const language of languages) {
+          const Journal = migrations.Journal;
+          if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath);
+          const outputFile = path.join(outputPath, `capture_${language}.json`);
+          const { data, fromPlugins, originalFromPlugins } = fs.readJSONSync(outputFile);
+          const journal = new Journal({
+            data,
+            supplementEntry: (entry, data) => {
+              entry._id = data[entry.keys[0]]?._id ?? '';
+              entry._type = data[entry.keys[0]]?._type ?? '';
+              if (entry._type && data[entry.keys[0]]?.[`_${entry._type}`]) {
+                entry[`_${entry._type}`] = data[entry.keys[0]]?.[`_${entry._type}`] ?? '';
+              }
+              return entry;
             }
-            return entry;
-          }
-        });
-        await migrations.migrate({ journal, fromPlugins, toPlugins: plugins });
-        // TODO: add options to rollback on any error, to default fail silently or to default terminate
-        console.log(journal.entries);
+          });
+          await migrations.migrate({ journal, fromPlugins, originalFromPlugins, toPlugins: plugins });
+          // TODO: add options to rollback on any error, to default fail silently or to default terminate
+          console.log(journal.entries);
+        }
+
         return next();
       }
 
@@ -195,6 +209,7 @@ module.exports = function(grunt) {
   });
 
 };
+
 
 ```
 ```sh
