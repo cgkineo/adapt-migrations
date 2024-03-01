@@ -19,8 +19,8 @@ export function addPlugin (description, config) {
 
       if (!description || !config) throw new Error('addPlugin - incorrectly configured')
 
-      const newPlugin = context.toPlugins.filter(plugin => (plugin.name === config.name || plugin.displayName?.toUpperCase() === config.name?.toUpperCase() ))
-      if (newPlugin.length === 0) throw new Error(`addPlugin - ${config.name} not found`)
+      const newPlugin = context.toPlugins.find(plugin => (plugin.name === config.name || plugin.displayName?.toUpperCase() === config.name?.toUpperCase() ))
+      if (!newPlugin) throw new Error(`addPlugin - ${config.name} not found`)
       context.fromPlugins.push(newPlugin[0])
     })
   }, { description, type: 'action' })
