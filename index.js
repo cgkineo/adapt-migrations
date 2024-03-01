@@ -25,6 +25,11 @@ import {
   testStopWhere,
   testSuccessWhere
 } from './api/tests.js'
+import {
+  updatePlugin,
+  removePlugin,
+  addPlugin
+} from './api/plugins.js'
 import Journal from './lib/Journal.js'
 import CacheManager from './lib/CacheManager.js'
 
@@ -46,6 +51,9 @@ export {
   testErrorWhere,
   testStopWhere,
   testSuccessWhere,
+  updatePlugin,
+  removePlugin,
+  addPlugin,
   // environment objects
   Journal,
   CacheManager
