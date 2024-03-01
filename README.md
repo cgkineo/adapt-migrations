@@ -191,7 +191,7 @@ module.exports = function(grunt) {
                 return entry;
               }
             });
-            await migrations.migrate({ journal, outputFile, fromPlugins, originalFromPlugins, toPlugins: plugins });
+            await migrations.migrate({ journal, fromPlugins, originalFromPlugins, toPlugins: plugins });
             // TODO: add options to rollback on any error, to default fail silently or to default terminate
             console.log(journal.entries);
           }
