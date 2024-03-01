@@ -32,7 +32,7 @@ export function updatePlugin (description, config) {
 
       if (!description || !config) throw new Error('updatePlugin - incorrectly configured')
 
-      context.fromPlugins.forEach((plugin) => {
+      context.fromPlugins.forEach(plugin => {
         if (plugin.name !== config.name) return
         plugin.version = config.version
         if (!config.framework) return
