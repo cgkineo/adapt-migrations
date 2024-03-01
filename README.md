@@ -171,7 +171,6 @@ module.exports = function(grunt) {
       }
 
       if (mode === 'migrate') {
-
         try {
           const languagesFile = path.join(outputPath, 'captureLanguages.json');
           const languages = fs.readJSONSync(languagesFile);
@@ -199,7 +198,6 @@ module.exports = function(grunt) {
         } catch (error) {
           console.log(error.stack)
         }
-
         return next();
       }
 
@@ -213,6 +211,7 @@ module.exports = function(grunt) {
   });
 
 };
+
 
 ```
 ```sh
