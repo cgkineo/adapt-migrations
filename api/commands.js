@@ -15,12 +15,9 @@ export async function capture ({ data, fromPlugins }) {
   }
 };
 
-export async function migrate ({ cwd = process.cwd(), fromPlugins, originalFromPlugins, toPlugins, journal }) {
+export async function migrate ({ cwd = process.cwd(), journal }) {
   return Task.runApplicable({
     cwd,
-    fromPlugins,
-    originalFromPlugins,
-    toPlugins,
     journal
   })
 }
