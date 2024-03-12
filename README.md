@@ -181,8 +181,10 @@ module.exports = function(grunt) {
             const outputFile = path.join(outputPath, `capture_${language}.json`);
             const { data, fromPlugins, originalFromPlugins } = fs.readJSONSync(outputFile);
             const journal = new Journal({
-              data,
-              fromPlugins,
+              data: {
+                data,
+                fromPlugins,
+              }
               supplementEntry: (entry, data) => {
                 entry._id = data[entry.keys[0]]?._id ?? '';
                 entry._type = data[entry.keys[0]]?._type ?? '';
