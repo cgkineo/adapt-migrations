@@ -185,7 +185,7 @@ module.exports = function(grunt) {
               data: {
                 data,
                 fromPlugins,
-                originalFromPlugins: originalFromPlugins,
+                originalFromPlugins,
                 toPlugins: plugins
               }
               supplementEntry: (entry, data) => {
