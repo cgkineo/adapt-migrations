@@ -179,11 +179,14 @@ module.exports = function(grunt) {
             const Journal = migrations.Journal;
             if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath);
             const outputFile = path.join(outputPath, `capture_${language}.json`);
-            const { data, fromPlugins, originalFromPlugins } = fs.readJSONSync(outputFile);
+            const { data, fromPlugins } = fs.readJSONSync(outputFile);
+            const originalFromPlugins = JSON.parse(JSON.stringify(fromPlugins))
             const journal = new Journal({
               data: {
                 data,
                 fromPlugins,
+                originalFromPlugins: originalFromPlugins,
+                toPlugins: plugins
               }
               supplementEntry: (entry, data) => {
                 entry._id = data[entry.keys[0]]?._id ?? '';
