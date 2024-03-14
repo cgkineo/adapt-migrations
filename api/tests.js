@@ -4,7 +4,7 @@ import { deferOrRunWrap } from '../lib/lifecycle.js'
 export function testSuccessWhere (description, {
   fromPlugins,
   toPlugins,
-  data
+  content
 }) {
   return deferOrRunWrap(() => {
     console.log('testSuccessWhere:', description)
@@ -13,7 +13,7 @@ export function testSuccessWhere (description, {
       shouldRun: true,
       fromPlugins,
       toPlugins,
-      data
+      content
     })
   }, { type: 'test' })
 };
@@ -21,7 +21,7 @@ export function testSuccessWhere (description, {
 export function testStopWhere (description, {
   fromPlugins,
   toPlugins,
-  data
+  content
 }) {
   return deferOrRunWrap(() => {
     console.log('testStopWhere:', description)
@@ -31,7 +31,7 @@ export function testStopWhere (description, {
       shouldRun: false,
       fromPlugins,
       toPlugins,
-      data
+      content
     })
   }, { type: 'test' })
 };
@@ -39,7 +39,7 @@ export function testStopWhere (description, {
 export function testErrorWhere (description, {
   fromPlugins,
   toPlugins,
-  data
+  content
 }) {
   return deferOrRunWrap(() => {
     console.log('testErrorWhere:', description)
@@ -48,7 +48,7 @@ export function testErrorWhere (description, {
       shouldError: true,
       fromPlugins,
       toPlugins,
-      data
+      content
     })
   }, { type: 'test' })
 };

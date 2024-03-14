@@ -8,13 +8,13 @@ import {
   describe
 } from './api/describe.js'
 import {
-  whereData,
+  whereContent,
   whereFromPlugin,
   whereToPlugin
 } from './api/where.js'
 import {
-  checkData,
-  mutateData
+  checkContent,
+  mutateContent
 } from './api/data.js'
 import {
   ifErroredAsk,
@@ -41,11 +41,11 @@ export {
   test,
   // migration script api
   describe,
-  whereData,
+  whereContent,
   whereFromPlugin,
   whereToPlugin,
-  checkData,
-  mutateData,
+  checkContent,
+  mutateContent,
   ifErroredAsk,
   throwError,
   testErrorWhere,
