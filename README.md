@@ -59,7 +59,7 @@ describe('quicknav to pagenav', async () => {
   whereData('has configured quicknavs', async content =>
     content.some(({ _component }) => _component === 'quicknav')
   );
-  mutateData('change _component name', async data => {
+  mutateData('change _component name', async content => {
     const quicknavs = content.filter(({ _component }) => _component === 'quicknav');
     quicknavs.forEach(item => (item._component = 'pagenav'));
     return true;
@@ -75,7 +75,7 @@ describe('quicknav to pagenav', async () => {
   testSuccessWhere('Valid plugins and data', {
     fromPlugins: [{ name: 'quicknav', version: '1.0.0' }],
     toPlugins: [{ name: 'pagenav', version: '1.0.0' }],
-    data: [{ _component: 'quicknav' }]
+    content: [{ _component: 'quicknav' }]
   });
   testStopWhere('Invalid data', {
     fromPlugins: [{ name: 'quicknav', version: '1.0.0' }],
