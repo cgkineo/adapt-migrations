@@ -6,7 +6,7 @@ https://github.com/cgkineo/adapt-migrations/issues/1
 ### Commands API
 https://github.com/cgkineo/adapt-migrations/blob/master/api/commands.js
 * `load({ cwd, cachePath, scripts })` - loads all migration tasks
-* `capture({ cwd, data, fromPlugins })` - captures current plugins and data
+* `capture({ cwd, content, fromPlugins })` - captures current plugins and content
 * `migrate({ cwd, toPlugins })` - migrates data from capture to new plugins
 * `test({ cwd })` - tests the migrations with dummy data
 
@@ -19,9 +19,9 @@ Functions:
 * `mutateData(dataFunction)` Change data, return true/false/throw Error
 * `checkData(dataFunction)` Check data, return true/false/throw Error
 * `throwError(description)` Throw an error
-* `testSuccessWhere({ fromPlugins, toPlugins, data })` Supply some tests data which should end in success
-* `testStopWhere({ fromPlugins, toPlugins, data })` Supply some tests data which should end prematurely
-* `testErrorWhere({ fromPlugins, toPlugins, data })` Supply some tests data which will trigger an error
+* `testSuccessWhere({ fromPlugins, toPlugins, content })` Supply some tests content which should end in success
+* `testStopWhere({ fromPlugins, toPlugins, content })` Supply some tests content which should end prematurely
+* `testErrorWhere({ fromPlugins, toPlugins, content })` Supply some tests content which will trigger an error
 
 Arguments:
 * `describeFunction = () => {}` Function body has a collection of migration script functions
@@ -38,16 +38,16 @@ Arguments:
 import { describe, whereData, whereFromPlugin, whereToPlugin, mutateData, checkData, throwError, ifErroredAsk, testSuccessWhere, testErrorWhere, testStopWhere } from 'adapt-migrations';
 
 describe('add "ollie" to displayTitle where exists', async () => {
-  whereData('has configured displayTitles', async data =>
-    data.some(({ displayTitle }) => displayTitle)
+  whereData('has configured displayTitles', async content =>
+    content.some(({ displayTitle }) => displayTitle)
   );
   mutateData('change displayTitle', async data => {
-    const quicknavs = data.filter(({ displayTitle }) => displayTitle);
+    const quicknavs = content.filter(({ displayTitle }) => displayTitle);
     quicknavs.forEach(item => (item.displayTitle += ' ollie'));
     return true;
   });
-  checkData('check everything is ok', async data => {
-    const isInvalid = data.some(({ displayTitle }) => displayTitle && !String(displayTitle).endsWith(' ollie'));
+  checkData('check everything is ok', async content => {
+    const isInvalid = content.some(({ displayTitle }) => displayTitle && !String(displayTitle).endsWith(' ollie'));
     if (isInvalid) throw new Error('found displayTitle without ollie at the end');
     return true;
   });
@@ -56,16 +56,16 @@ describe('add "ollie" to displayTitle where exists', async () => {
 describe('quicknav to pagenav', async () => {
   whereFromPlugin('quicknav v1.0.0', { name: 'quicknav', version: '1.0.0' });
   whereToPlugin('pagenav v1.0.0', { name: 'pagenav', version: '1.0.0' });
-  whereData('has configured quicknavs', async data =>
-    data.some(({ _component }) => _component === 'quicknav')
+  whereData('has configured quicknavs', async content =>
+    content.some(({ _component }) => _component === 'quicknav')
   );
   mutateData('change _component name', async data => {
-    const quicknavs = data.filter(({ _component }) => _component === 'quicknav');
+    const quicknavs = content.filter(({ _component }) => _component === 'quicknav');
     quicknavs.forEach(item => (item._component = 'pagenav'));
     return true;
   });
-  checkData('check everything is ok', async data => {
-    const isInvalid = data.some(({ isInvalid }) => isInvalid);
+  checkData('check everything is ok', async content => {
+    const isInvalid = content.some(({ isInvalid }) => isInvalid);
     if (isInvalid) throw new Error('found invalid data attribute');
     return true;
   });
@@ -80,28 +80,28 @@ describe('quicknav to pagenav', async () => {
   testStopWhere('Invalid data', {
     fromPlugins: [{ name: 'quicknav', version: '1.0.0' }],
     toPlugins: [{ name: 'pagenav', version: '1.0.0' }],
-    data: [{ _component: 'quicknav1' }]
+    content: [{ _component: 'quicknav1' }]
   });
   testStopWhere('Invalid origin plugins', {
     fromPlugins: [{ name: 'quicknav', version: '0.1.0' }],
     toPlugins: [{ name: 'pagenav', version: '0.1.0' }],
-    data: [{ _component: 'quicknav' }]
+    content: [{ _component: 'quicknav' }]
   });
   testStopWhere('Invalid destination plugins', {
-    data: [{ _component: 'quicknav' }],
+    content: [{ _component: 'quicknav' }],
     fromPlugins: [{ name: 'quicknav', version: '1.0.0' }],
     toPlugins: [{ name: 'pagenav', version: '0.1.0' }]
   });
   testErrorWhere('Has invalid configuration', {
     fromPlugins: [{ name: 'quicknav', version: '1.0.0' }],
     toPlugins: [{ name: 'pagenav', version: '1.0.0' }],
-    data: [{ _component: 'quicknav', isInvalid: true }]
+    content: [{ _component: 'quicknav', isInvalid: true }]
   });
 });
 
 describe('where quicknav is weirdly configured', async () => {
-  checkData('check everything is ok', async data => {
-    const isInvalid = data.some(({ isInvalid }) => isInvalid);
+  checkData('check everything is ok', async content => {
+    const isInvalid = content.some(({ isInvalid }) => isInvalid);
     if (isInvalid) throw new Error('Something went wrong');
     return true;
   });
@@ -161,8 +161,8 @@ module.exports = function(grunt) {
         fs.writeJSONSync(languageFile, languages);
 
         languages.forEach(async (language, index) => {
-          const data = framework.getData().languages[index].getAllFileItems().map(fileItem => fileItem.item);
-          const captured = await migrations.capture({ data, fromPlugins: plugins });
+          const content = framework.getData().languages[index].getAllFileItems().map(fileItem => fileItem.item);
+          const captured = await migrations.capture({ content, fromPlugins: plugins });
           const outputFile = path.join(outputPath, `capture_${language}.json`);
           fs.writeJSONSync(outputFile, captured);
         });
@@ -179,11 +179,11 @@ module.exports = function(grunt) {
             const Journal = migrations.Journal;
             if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath);
             const outputFile = path.join(outputPath, `capture_${language}.json`);
-            const { data, fromPlugins } = fs.readJSONSync(outputFile);
+            const { content, fromPlugins } = fs.readJSONSync(outputFile);
             const originalFromPlugins = JSON.parse(JSON.stringify(fromPlugins))
             const journal = new Journal({
               data: {
-                data,
+                content,
                 fromPlugins,
                 originalFromPlugins,
                 toPlugins: plugins

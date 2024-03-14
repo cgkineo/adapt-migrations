@@ -8,9 +8,9 @@ export async function load ({ cwd = process.cwd(), scripts = [], cachePath } = {
   })
 }
 
-export async function capture ({ data, fromPlugins }) {
+export async function capture ({ content, fromPlugins }) {
   return {
-    data,
+    content,
     fromPlugins
   }
 };
