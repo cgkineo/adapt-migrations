@@ -1,9 +1,9 @@
 import semver from 'semver'
 import { deferOrRunWrap, successStopOrErrorWrap } from '../lib/lifecycle.js'
 
-export function whereData (description, callback) {
+export function whereContent (description, callback) {
   return deferOrRunWrap(({ content }) => {
-    return successStopOrErrorWrap('whereData', description, async () => {
+    return successStopOrErrorWrap('whereContent', description, async () => {
       return callback(content)
     })
   }, { description, type: 'where' })

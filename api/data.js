@@ -1,16 +1,16 @@
 import { deferOrRunWrap, successStopOrErrorWrap } from '../lib/lifecycle.js'
 
-export function mutateData (description, callback) {
+export function mutateContent (description, callback) {
   return deferOrRunWrap(function (context) {
-    return successStopOrErrorWrap('mutateData', description, async () => {
+    return successStopOrErrorWrap('mutateContent', description, async () => {
       return callback(context.content)
     })
   }, { description, type: 'action' })
 };
 
-export function checkData (description, callback) {
+export function checkContent (description, callback) {
   return deferOrRunWrap(function (context) {
-    return successStopOrErrorWrap('checkData', description, async () => {
+    return successStopOrErrorWrap('checkContent', description, async () => {
       context.journal.freeze()
       const result = await callback(context.content)
       context.journal.unfreeze()

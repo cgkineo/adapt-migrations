@@ -13,11 +13,11 @@ https://github.com/cgkineo/adapt-migrations/blob/master/api/commands.js
 ### Migration script API
 Functions:
 * `describe(description, describeFunction)` Describe a migration
-* `whereData(description, dataFilterFunction)` Limit when the migration runs, return true/false/throw Error
+* `whereContent(description, dataFilterFunction)` Limit when the migration runs, return true/false/throw Error
 * `whereFromPlugin(description, fromPluginFilterFunction)` Limit when the migration runs, return true/false/throw Error
 * `whereToPlugin(description, toPluginFilterFunction)` Limit when the migration runs, return true/false/throw Error
-* `mutateData(dataFunction)` Change data, return true/false/throw Error
-* `checkData(dataFunction)` Check data, return true/false/throw Error
+* `mutateContent(dataFunction)` Change data, return true/false/throw Error
+* `checkContent(dataFunction)` Check data, return true/false/throw Error
 * `throwError(description)` Throw an error
 * `testSuccessWhere({ fromPlugins, toPlugins, content })` Supply some tests content which should end in success
 * `testStopWhere({ fromPlugins, toPlugins, content })` Supply some tests content which should end prematurely
@@ -35,18 +35,18 @@ Arguments:
 
 ### Example migration script
 ```js
-import { describe, whereData, whereFromPlugin, whereToPlugin, mutateData, checkData, throwError, ifErroredAsk, testSuccessWhere, testErrorWhere, testStopWhere } from 'adapt-migrations';
+import { describe, whereContent, whereFromPlugin, whereToPlugin, mutateContent, checkContent, throwError, ifErroredAsk, testSuccessWhere, testErrorWhere, testStopWhere } from 'adapt-migrations';
 
 describe('add "ollie" to displayTitle where exists', async () => {
-  whereData('has configured displayTitles', async content =>
+  whereContent('has configured displayTitles', async content =>
     content.some(({ displayTitle }) => displayTitle)
   );
-  mutateData('change displayTitle', async data => {
+  mutateContent('change displayTitle', async data => {
     const quicknavs = content.filter(({ displayTitle }) => displayTitle);
     quicknavs.forEach(item => (item.displayTitle += ' ollie'));
     return true;
   });
-  checkData('check everything is ok', async content => {
+  checkContent('check everything is ok', async content => {
     const isInvalid = content.some(({ displayTitle }) => displayTitle && !String(displayTitle).endsWith(' ollie'));
     if (isInvalid) throw new Error('found displayTitle without ollie at the end');
     return true;
@@ -56,15 +56,15 @@ describe('add "ollie" to displayTitle where exists', async () => {
 describe('quicknav to pagenav', async () => {
   whereFromPlugin('quicknav v1.0.0', { name: 'quicknav', version: '1.0.0' });
   whereToPlugin('pagenav v1.0.0', { name: 'pagenav', version: '1.0.0' });
-  whereData('has configured quicknavs', async content =>
+  whereContent('has configured quicknavs', async content =>
     content.some(({ _component }) => _component === 'quicknav')
   );
-  mutateData('change _component name', async content => {
+  mutateContent('change _component name', async content => {
     const quicknavs = content.filter(({ _component }) => _component === 'quicknav');
     quicknavs.forEach(item => (item._component = 'pagenav'));
     return true;
   });
-  checkData('check everything is ok', async content => {
+  checkContent('check everything is ok', async content => {
     const isInvalid = content.some(({ isInvalid }) => isInvalid);
     if (isInvalid) throw new Error('found invalid data attribute');
     return true;
@@ -100,7 +100,7 @@ describe('quicknav to pagenav', async () => {
 });
 
 describe('where quicknav is weirdly configured', async () => {
-  checkData('check everything is ok', async content => {
+  checkContent('check everything is ok', async content => {
     const isInvalid = content.some(({ isInvalid }) => isInvalid);
     if (isInvalid) throw new Error('Something went wrong');
     return true;
