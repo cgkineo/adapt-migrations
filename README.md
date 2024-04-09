@@ -189,10 +189,10 @@ module.exports = function(grunt) {
                 toPlugins: plugins
               }
               supplementEntry: (entry, data) => {
-                entry._id = data[entry.keys[0]]?._id ?? '';
-                entry._type = data[entry.keys[0]]?._type ?? '';
-                if (entry._type && data[entry.keys[0]]?.[`_${entry._type}`]) {
-                  entry[`_${entry._type}`] = data[entry.keys[0]]?.[`_${entry._type}`] ?? '';
+                entry._id = data[entry.keys[0]][entry.keys[1]]?._id ?? '';
+                entry._type = data[entry.keys[0]][entry.keys[1]]?._type ?? '';
+                if (entry._type && data[entry.keys[0]][entry.keys[1]]?.[`_${entry._type}`]) {
+                  entry[`_${entry._type}`] = data[entry.keys[0]][entry.keys[1]]?.[`_${entry._type}`] ?? '';
                 }
                 return entry;
               }
