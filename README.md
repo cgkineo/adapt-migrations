@@ -199,7 +199,31 @@ module.exports = function(grunt) {
             });
             await migrations.migrate({ journal });
             // TODO: add options to rollback on any error, to default fail silently or to default terminate
-            console.log(journal.entries);
+            // console.log(journal.entries);
+            const languageData = framework.getData().languages.filter(languageData => languageData.name === language)
+            const languagePath = languageData[0].path;
+            const manifestPath = languagePath + 'language_data_manifest.js';
+            let manifest;
+            try {
+              manifest = await this.getJSON(manifestPath);
+            } catch (err) {
+              manifest = ['course.json', 'contentObjects.json', 'articles.json', 'blocks.json', 'components.json'];
+            }
+
+            manifest.map(manifestItem => {
+              const mainfestItemEntries = journal.entries.filter(entry => entry._filePath === `${languagePath}${manifestItem}`)
+              if (mainfestItemEntries.length === 0) return
+
+              // open file
+              const manifestItemPath = path.join(languagePath, manifestItem);
+              let manifestItemFile = fs.readJSONSync(manifestItemPath);
+
+              mainfestItemEntries.map(entryItem => {
+                manifestItemFile[entryItem._index][entryItem.keys[2]] = entryItem.value
+              })
+
+              fs.writeJSONSync(manifestItemPath, manifestItemFile);
+            });
           }
         } catch (error) {
           console.log(error.stack)
