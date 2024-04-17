@@ -180,6 +180,7 @@ module.exports = function(grunt) {
         fs.writeJSONSync(languageFile, languages);
         languages.forEach(async (language, index) => {
           const data = framework.getData();
+          // get all items from config.sjon file to all language files, append __index__ and __path__ to each item
           const content = [
             ...data.configFile.fileItems,
             ...data.languages[index].getAllFileItems()
@@ -222,8 +223,11 @@ module.exports = function(grunt) {
             await migrations.migrate({ journal });
             console.log(journal.entries);
 
+            // group all content items by path
             const outputFilePathItems = _.groupBy(content, '__path__');
+            // sort file items inside each path
             Object.values(outputFilePathItems).forEach(outputFile => outputFile.sort((a, b) => a.__index__ - b.__index__));
+            // get paths
             const outputFilePaths = Object.keys(outputFilePathItems);
 
             outputFilePaths.forEach(outputPath => {
@@ -231,8 +235,8 @@ module.exports = function(grunt) {
               if (!outputItems?.length) return;
               const isSingleObject = (outputItems.length === 1 && outputItems[0].__index__ === null);
               const stripped = isSingleObject
-                ? undressPathIndex(outputItems[0])
-                : outputItems.map(undressPathIndex);
+                ? undressPathIndex(outputItems[0]) // config.json, course.json
+                : outputItems.map(undressPathIndex); // contentObjects.json, articles.json, blocks.json, components.json
               fs.writeJSONSync(outputPath, stripped, { replacer: null, spaces: 2 });
             });
           }
