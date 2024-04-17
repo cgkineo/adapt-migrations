@@ -8,25 +8,23 @@ export async function load ({ cwd = process.cwd(), scripts = [], cachePath } = {
   })
 }
 
-export async function capture ({ data, fromPlugins }) {
+export async function capture ({ content, fromPlugins }) {
   return {
-    data,
+    content,
     fromPlugins
   }
 };
 
-export async function migrate ({ cwd = process.cwd(), fromPlugins, originalFromPlugins, toPlugins, journal }) {
+export async function migrate ({ cwd = process.cwd(), journal }) {
   return Task.runApplicable({
     cwd,
-    fromPlugins,
-    originalFromPlugins,
-    toPlugins,
     journal
   })
 }
 
 export async function test ({ cwd = process.cwd() } = {}) {
   return Task.runTests({
-    cwd
+    cwd,
+    journal
   })
 }
