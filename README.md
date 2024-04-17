@@ -180,7 +180,7 @@ module.exports = function(grunt) {
         fs.writeJSONSync(languageFile, languages);
         languages.forEach(async (language, index) => {
           const data = framework.getData();
-          // get all items from config.sjon file to all language files, append __index__ and __path__ to each item
+          // get all items from config.json file and all language files, append __index__ and __path__ to each item
           const content = [
             ...data.configFile.fileItems,
             ...data.languages[index].getAllFileItems()
@@ -225,7 +225,7 @@ module.exports = function(grunt) {
 
             // group all content items by path
             const outputFilePathItems = _.groupBy(content, '__path__');
-            // sort file items inside each path
+            // sort items inside each path
             Object.values(outputFilePathItems).forEach(outputFile => outputFile.sort((a, b) => a.__index__ - b.__index__));
             // get paths
             const outputFilePaths = Object.keys(outputFilePathItems);
