@@ -123,7 +123,7 @@ module.exports = function(grunt) {
     return path.replace(/\\/g, '/');
   }
 
-  function dressFileIndex(fileItem) {
+  function dressPathIndex(fileItem) {
     return {
       ...fileItem.item,
       __index__: fileItem.index,
@@ -131,7 +131,7 @@ module.exports = function(grunt) {
     };
   }
 
-  function undressFileIndex(object) {
+  function undressPathIndex(object) {
     const clone = { ...object };
     delete clone.__index__;
     delete clone.__path__;
@@ -155,7 +155,7 @@ module.exports = function(grunt) {
       });
 
       const framework = Helpers.getFramework();
-      grunt.log.ok(`Using ${framework.useOutputData ? framework.outputPath : framework.sourcePath} folder for course content...`);
+      grunt.log.ok(`Using ${framework.useOutputData ? framework.outputPath : framework.sourcePath} folder for course data...`);
 
       const plugins = framework.getPlugins().getAllPackageJSONFileItems().map(fileItem => fileItem.item);
       const migrationScripts = Array.from(await new Promise(resolve => {
@@ -183,7 +183,7 @@ module.exports = function(grunt) {
           const content = [
             ...data.configFile.fileItems,
             ...data.languages[index].getAllFileItems()
-          ].map(dressFileIndex);
+          ].map(dressPathIndex);
           const captured = await migrations.capture({ content, fromPlugins: plugins });
           const outputFile = path.join(outputPath, `capture_${language}.json`);
           fs.writeJSONSync(outputFile, captured);
@@ -223,9 +223,7 @@ module.exports = function(grunt) {
             console.log(journal.entries);
 
             const outputFilePathItems = _.groupBy(content, '__path__');
-            Object.values(outputFilePathItems).forEach(outputFile => outputFile.sort((a, b) => {
-              return a.__index__ - b.__index__;
-            }));
+            Object.values(outputFilePathItems).forEach(outputFile => outputFile.sort((a, b) => a.__index__ - b.__index__));
             const outputFilePaths = Object.keys(outputFilePathItems);
 
             outputFilePaths.forEach(outputPath => {
@@ -233,8 +231,8 @@ module.exports = function(grunt) {
               if (!outputItems?.length) return;
               const isSingleObject = (outputItems.length === 1 && outputItems[0].__index__ === null);
               const stripped = isSingleObject
-                ? undressFileIndex(outputItems[0])
-                : outputItems.map(undressFileIndex);
+                ? undressPathIndex(outputItems[0])
+                : outputItems.map(undressPathIndex);
               fs.writeJSONSync(outputPath, stripped, { replacer: null, spaces: 2 });
             });
           }
