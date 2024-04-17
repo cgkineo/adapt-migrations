@@ -7,17 +7,17 @@ https://github.com/cgkineo/adapt-migrations/issues/1
 https://github.com/cgkineo/adapt-migrations/blob/master/api/commands.js
 * `load({ cwd, cachePath, scripts })` - loads all migration tasks
 * `capture({ cwd, content, fromPlugins })` - captures current plugins and content
-* `migrate({ cwd, toPlugins })` - migrates data from capture to new plugins
-* `test({ cwd })` - tests the migrations with dummy data
+* `migrate({ cwd, toPlugins })` - migrates content from capture to new plugins
+* `test({ cwd })` - tests the migrations with dummy content
 
 ### Migration script API
 Functions:
 * `describe(description, describeFunction)` Describe a migration
-* `whereContent(description, dataFilterFunction)` Limit when the migration runs, return true/false/throw Error
+* `whereContent(description, contentFilterFunction)` Limit when the migration runs, return true/false/throw Error
 * `whereFromPlugin(description, fromPluginFilterFunction)` Limit when the migration runs, return true/false/throw Error
 * `whereToPlugin(description, toPluginFilterFunction)` Limit when the migration runs, return true/false/throw Error
-* `mutateContent(dataFunction)` Change data, return true/false/throw Error
-* `checkContent(dataFunction)` Check data, return true/false/throw Error
+* `mutateContent(contentFunction)` Change content, return true/false/throw Error
+* `checkContent(contentFunction)` Check content, return true/false/throw Error
 * `throwError(description)` Throw an error
 * `testSuccessWhere({ fromPlugins, toPlugins, content })` Supply some tests content which should end in success
 * `testStopWhere({ fromPlugins, toPlugins, content })` Supply some tests content which should end prematurely
@@ -25,13 +25,13 @@ Functions:
 
 Arguments:
 * `describeFunction = () => {}` Function body has a collection of migration script functions
-* `dataFilterFunction = data => {}` Function body should return true/false/throw Error
+* `contentFilterFunction = content => {}` Function body should return true/false/throw Error
 * `fromPluginFilterFunction = fromPlugins => {}` Function body should return true/false/throw Error
 * `toPluginFilterFunction = toPlugins => {}` Function body should return true/false/throw Error
-* `dataFunction = data => { }` Function body should mutate or check the data, returning true/false/throw Error
+* `contentFunction = content => { }` Function body should mutate or check the content, returning true/false/throw Error
 * `fromPlugins = [{ name: 'quickNav , version: '1.0.0' }]` Test data describing the original plugins
 * `toPlugins = [{ name: 'pageNav , version: '1.0.0' }]` Test data describing the destination plugins
-* `data = [{ _id: 'c-05, ... }]` Test data for the course content
+* `content = [{ _id: 'c-05, ... }]` Test content for the course content
 
 ### Example migration script
 ```js
@@ -41,7 +41,7 @@ describe('add "ollie" to displayTitle where exists', async () => {
   whereContent('has configured displayTitles', async content =>
     content.some(({ displayTitle }) => displayTitle)
   );
-  mutateContent('change displayTitle', async data => {
+  mutateContent('change displayTitle', async content => {
     const quicknavs = content.filter(({ displayTitle }) => displayTitle);
     quicknavs.forEach(item => (item.displayTitle += ' ollie'));
     return true;
@@ -66,18 +66,18 @@ describe('quicknav to pagenav', async () => {
   });
   checkContent('check everything is ok', async content => {
     const isInvalid = content.some(({ isInvalid }) => isInvalid);
-    if (isInvalid) throw new Error('found invalid data attribute');
+    if (isInvalid) throw new Error('found invalid content attribute');
     return true;
   });
   // TODO: handle errors with question, allow to run without ui
   // ifErroredAsk({ question: 'Skip error', yes: 'Yes', no: 'No', defaultSkipError: true });
   // TODO: modify stack traces one errors to refer to the original migration script rather than the cached one,keep map of cached files to original files
-  testSuccessWhere('Valid plugins and data', {
+  testSuccessWhere('Valid plugins and content', {
     fromPlugins: [{ name: 'quicknav', version: '1.0.0' }],
     toPlugins: [{ name: 'pagenav', version: '1.0.0' }],
     content: [{ _component: 'quicknav' }]
   });
-  testStopWhere('Invalid data', {
+  testStopWhere('Invalid content', {
     fromPlugins: [{ name: 'quicknav', version: '1.0.0' }],
     toPlugins: [{ name: 'pagenav', version: '1.0.0' }],
     content: [{ _component: 'quicknav1' }]
@@ -117,6 +117,26 @@ module.exports = function(grunt) {
   const globs = require('globs');
   const path = require('path');
   const fs = require('fs-extra');
+  const _ = require('underscore');
+
+  function unix(path) {
+    return path.replace(/\\/g, '/');
+  }
+
+  function dressFileIndex(fileItem) {
+    return {
+      ...fileItem.item,
+      __index__: fileItem.index,
+      __path__: unix(fileItem.file.path)
+    };
+  }
+
+  function undressFileIndex(object) {
+    const clone = { ...object };
+    delete clone.__index__;
+    delete clone.__path__;
+    return clone;
+  }
 
   grunt.registerTask('migration', 'Migrate from on verion to another', function(mode) {
     const next = this.async();
@@ -135,7 +155,7 @@ module.exports = function(grunt) {
       });
 
       const framework = Helpers.getFramework();
-      grunt.log.ok(`Using ${framework.useOutputData ? framework.outputPath : framework.sourcePath} folder for course data...`);
+      grunt.log.ok(`Using ${framework.useOutputData ? framework.outputPath : framework.sourcePath} folder for course content...`);
 
       const plugins = framework.getPlugins().getAllPackageJSONFileItems().map(fileItem => fileItem.item);
       const migrationScripts = Array.from(await new Promise(resolve => {
@@ -154,14 +174,16 @@ module.exports = function(grunt) {
       });
 
       if (mode === 'capture') {
-        // TODO: capture all languages and not just the first
         if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath);
         const languages = framework.getData().languages.map((language) => language.name);
         const languageFile = path.join(outputPath, 'captureLanguages.json');
         fs.writeJSONSync(languageFile, languages);
-
         languages.forEach(async (language, index) => {
-          const content = framework.getData().languages[index].getAllFileItems().map(fileItem => fileItem.item);
+          const data = framework.getData();
+          const content = [
+            ...data.configFile.fileItems,
+            ...data.languages[index].getAllFileItems()
+          ].map(dressFileIndex);
           const captured = await migrations.capture({ content, fromPlugins: plugins });
           const outputFile = path.join(outputPath, `capture_${language}.json`);
           fs.writeJSONSync(outputFile, captured);
@@ -180,14 +202,14 @@ module.exports = function(grunt) {
             if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath);
             const outputFile = path.join(outputPath, `capture_${language}.json`);
             const { content, fromPlugins } = fs.readJSONSync(outputFile);
-            const originalFromPlugins = JSON.parse(JSON.stringify(fromPlugins))
+            const originalFromPlugins = JSON.parse(JSON.stringify(fromPlugins));
             const journal = new Journal({
               data: {
                 content,
                 fromPlugins,
                 originalFromPlugins,
                 toPlugins: plugins
-              }
+              },
               supplementEntry: (entry, data) => {
                 entry._id = data[entry.keys[0]][entry.keys[1]]?._id ?? '';
                 entry._type = data[entry.keys[0]][entry.keys[1]]?._type ?? '';
@@ -198,35 +220,26 @@ module.exports = function(grunt) {
               }
             });
             await migrations.migrate({ journal });
-            // TODO: add options to rollback on any error, to default fail silently or to default terminate
-            // console.log(journal.entries);
-            const languageData = framework.getData().languages.filter(languageData => languageData.name === language)
-            const languagePath = languageData[0].path;
-            const manifestPath = languagePath + 'language_data_manifest.js';
-            let manifest;
-            try {
-              manifest = await this.getJSON(manifestPath);
-            } catch (err) {
-              manifest = ['course.json', 'contentObjects.json', 'articles.json', 'blocks.json', 'components.json'];
-            }
+            console.log(journal.entries);
 
-            manifest.map(manifestItem => {
-              const mainfestItemEntries = journal.entries.filter(entry => entry._filePath === `${languagePath}${manifestItem}`)
-              if (mainfestItemEntries.length === 0) return
+            const outputFilePathItems = _.groupBy(content, '__path__');
+            Object.values(outputFilePathItems).forEach(outputFile => outputFile.sort((a, b) => {
+              return a.__index__ - b.__index__;
+            }));
+            const outputFilePaths = Object.keys(outputFilePathItems);
 
-              // open file
-              const manifestItemPath = path.join(languagePath, manifestItem);
-              let manifestItemFile = fs.readJSONSync(manifestItemPath);
-
-              mainfestItemEntries.map(entryItem => {
-                manifestItemFile[entryItem._index][entryItem.keys[2]] = entryItem.value
-              })
-
-              fs.writeJSONSync(manifestItemPath, manifestItemFile);
+            outputFilePaths.forEach(outputPath => {
+              const outputItems = outputFilePathItems[outputPath];
+              if (!outputItems?.length) return;
+              const isSingleObject = (outputItems.length === 1 && outputItems[0].__index__ === null);
+              const stripped = isSingleObject
+                ? undressFileIndex(outputItems[0])
+                : outputItems.map(undressFileIndex);
+              fs.writeJSONSync(outputPath, stripped, { replacer: null, spaces: 2 });
             });
           }
         } catch (error) {
-          console.log(error.stack)
+          console.log(error.stack);
         }
         return next();
       }
@@ -242,12 +255,11 @@ module.exports = function(grunt) {
 
 };
 
-
 ```
 ```sh
-grunt migration:capture # captures current plugins and data
+grunt migration:capture # captures current plugins and content
 # do plugin/fw updates
-grunt migration:migrate # migrates data from capture to new plugins
-grunt migration:test # tests the migrations with dummy data
-grunt migration:test --file=adapt-contrib-text/migrations/text.js # tests the migrations with dummy data
+grunt migration:migrate # migrates content from capture to new plugins
+grunt migration:test # tests the migrations with dummy content
+grunt migration:test --file=adapt-contrib-text/migrations/text.js # tests the migrations with dummy content
 ```
