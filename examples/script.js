@@ -2,7 +2,8 @@
 
 import { describe, whereContent, whereFromPlugin, whereToPlugin, mutateContent, checkContent, throwError, ifErroredAsk, testSuccessWhere, testErrorWhere, testStopWhere } from 'adapt-migrations';
 
-describe('add "ollie" to displayTitle where exists', async () => {
+describe('update plugin from v6.1.4 to v6.1.5 and add "Ollie" to display title', async () => {
+  whereFromPlugin('text v6.1.4', { name: 'adapt-contrib-text', version: '<=6.1.4' });
   whereContent('has configured displayTitles', async content =>
     content.some(({ displayTitle }) => displayTitle)
   );
@@ -16,11 +17,14 @@ describe('add "ollie" to displayTitle where exists', async () => {
     if (isInvalid) throw new Error('found displayTitle without ollie at the end');
     return true;
   });
+  updatePlugin('update text plugin', {name: 'adapt-contrib-text', version: '6.1.5', framework: '>=5.19.4'})
 });
 
 describe('quicknav to pagenav', async () => {
+  addPlugin('add pagenav plugin', { name: 'pagenav', version: '1.0.0'});
   whereFromPlugin('quicknav v1.0.0', { name: 'quicknav', version: '1.0.0' });
   whereToPlugin('pagenav v1.0.0', { name: 'pagenav', version: '1.0.0' });
+  removePlugin('remove quicknav plugin', {name: 'quicknav'})
   whereContent('has configured quicknavs', async content =>
     content.some(({ _component }) => _component === 'quicknav')
   );
