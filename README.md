@@ -34,8 +34,13 @@ Arguments:
 * `content = [{ _id: 'c-05, ... }]` Test content for the course content
 
 ### Grunt Commands
+```sh
 grunt migration:capture # captures current plugins and content
+```
+
 # do plugin/fw updates
+```sh
 grunt migration:migrate # migrates content from capture to new plugins
 grunt migration:test # tests the migrations with dummy content
 grunt migration:test --file=adapt-contrib-text/migrations/text.js # tests the migrations with dummy content
+```
