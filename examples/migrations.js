@@ -147,10 +147,6 @@ module.exports = function(grunt) {
         return next();
       }
 
-      if (mode === 'revert') {
-
-      }
-
       if (mode === 'test') {
         await migrations.test();
         return next();
