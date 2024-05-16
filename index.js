@@ -32,6 +32,7 @@ import {
 } from './api/plugins.js'
 import Journal from './lib/Journal.js'
 import CacheManager from './lib/CacheManager.js'
+import Logger from './lib/Logger.js'
 
 export {
   // commands
@@ -56,5 +57,6 @@ export {
   addPlugin,
   // environment objects
   Journal,
-  CacheManager
+  CacheManager,
+  Logger
 }

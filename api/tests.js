@@ -1,5 +1,8 @@
 import TaskTest from '../lib/TaskTest.js'
 import { deferOrRunWrap } from '../lib/lifecycle.js'
+import Logger from '../lib/Logger.js'
+
+const logger = Logger.getInstance();
 
 export function testSuccessWhere (description, {
   fromPlugins,
@@ -7,7 +10,7 @@ export function testSuccessWhere (description, {
   content
 }) {
   return deferOrRunWrap(() => {
-    console.log('testSuccessWhere:', description)
+    logger.debug(`Tests -- testSuccessWhere ${description}`)
     return new TaskTest({
       description,
       shouldRun: true,
@@ -24,7 +27,7 @@ export function testStopWhere (description, {
   content
 }) {
   return deferOrRunWrap(() => {
-    console.log('testStopWhere:', description)
+    logger.debug(`Tests -- testStopWhere ${description}`)
     return new TaskTest({
       description,
       shouldStop: true,
@@ -42,7 +45,7 @@ export function testErrorWhere (description, {
   content
 }) {
   return deferOrRunWrap(() => {
-    console.log('testErrorWhere:', description)
+    logger.debug(`Tests -- testErrorWhere ${description}`)
     return new TaskTest({
       description,
       shouldError: true,

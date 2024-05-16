@@ -1,6 +1,4 @@
-// Example grunt task
-
-module.exports = function (grunt) {
+module.exports = function(grunt) {
 
   const Helpers = require('../helpers')(grunt);
   const globs = require('globs');
@@ -27,14 +25,14 @@ module.exports = function (grunt) {
     return clone;
   }
 
-  grunt.registerTask('migration', 'Migrate from on verion to another', function (mode) {
+  grunt.registerTask('migration', 'Migrate from on verion to another', function(mode) {
     const next = this.async();
     const buildConfig = Helpers.generateConfigData();
     const fileNameIncludes = grunt.option('file');
 
-    (async function () {
+    (async function() {
       const migrations = await import('adapt-migrations');
-
+      const logger = migrations.Logger.getInstance();
       const cwd = process.cwd();
       const outputPath = path.join(cwd, './migrations/');
       const cache = new migrations.CacheManager();
@@ -44,7 +42,7 @@ module.exports = function (grunt) {
       });
 
       const framework = Helpers.getFramework();
-      grunt.log.ok(`Using ${framework.useOutputData ? framework.outputPath : framework.sourcePath} folder for course data...`);
+      logger.debug(`Using ${framework.useOutputData ? framework.outputPath : framework.sourcePath} folder for course data...`);
 
       const plugins = framework.getPlugins().getAllPackageJSONFileItems().map(fileItem => fileItem.item);
       const migrationScripts = Array.from(await new Promise(resolve => {
@@ -59,26 +57,30 @@ module.exports = function (grunt) {
 
       await migrations.load({
         cachePath,
-        scripts: migrationScripts
+        scripts: migrationScripts,
+        logger
       });
 
       if (mode === 'capture') {
+
         if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath);
         const languages = framework.getData().languages.map((language) => language.name);
         const languageFile = path.join(outputPath, 'captureLanguages.json');
         fs.writeJSONSync(languageFile, languages);
         languages.forEach(async (language, index) => {
+          logger.debug(`Migration -- Capture ${language}`)
           const data = framework.getData();
           // get all items from config.json file and all language files, append __index__ and __path__ to each item
           const content = [
             ...data.configFile.fileItems,
             ...data.languages[index].getAllFileItems()
           ].map(dressPathIndex);
-          const captured = await migrations.capture({ content, fromPlugins: plugins });
+          const captured = await migrations.capture({ content, fromPlugins: plugins, logger });
           const outputFile = path.join(outputPath, `capture_${language}.json`);
           fs.writeJSONSync(outputFile, captured);
         });
 
+        logger.output(outputPath, 'capture');
         return next();
       }
 
@@ -88,17 +90,19 @@ module.exports = function (grunt) {
           const languages = fs.readJSONSync(languagesFile);
 
           for (const language of languages) {
+            logger.debug(`Migration -- Migrate ${language}`)
             const Journal = migrations.Journal;
             if (!fs.existsSync(outputPath)) fs.mkdirSync(outputPath);
             const outputFile = path.join(outputPath, `capture_${language}.json`);
             const { content, fromPlugins } = fs.readJSONSync(outputFile);
             const originalFromPlugins = JSON.parse(JSON.stringify(fromPlugins));
             const journal = new Journal({
+              logger,
               data: {
                 content,
                 fromPlugins,
                 originalFromPlugins,
-                toPlugins: plugins
+                toPlugins: plugins,
               },
               supplementEntry: (entry, data) => {
                 entry._id = data[entry.keys[0]][entry.keys[1]]?._id ?? '';
@@ -109,8 +113,14 @@ module.exports = function (grunt) {
                 return entry;
               }
             });
-            await migrations.migrate({ journal });
-            console.log(journal.entries);
+            await migrations.migrate({ journal, logger });
+
+            // Todo - {
+              // display changes success/failure and request user confirmation before completing
+              // move saving of content outside of the language loop
+              // only 1 confirmation per course rather than 1 per language
+              // output journal entries for revert
+            // }
 
             // group all content items by path
             const outputFilePathItems = _.groupBy(content, '__path__');
@@ -126,12 +136,14 @@ module.exports = function (grunt) {
               const stripped = isSingleObject
                 ? undressPathIndex(outputItems[0]) // config.json, course.json
                 : outputItems.map(undressPathIndex); // contentObjects.json, articles.json, blocks.json, components.json
+              // console.log(journal.entries)
               fs.writeJSONSync(outputPath, stripped, { replacer: null, spaces: 2 });
             });
           }
         } catch (error) {
-          console.log(error.stack);
+          logger.error(error.stack);
         }
+        logger.output(outputPath, 'migrate');
         return next();
       }
 
@@ -143,4 +155,5 @@ module.exports = function (grunt) {
       return next();
     })();
   });
+
 };
