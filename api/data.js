@@ -12,7 +12,13 @@ export function checkContent (description, callback) {
   return deferOrRunWrap(function (context) {
     return successStopOrErrorWrap('checkContent', description, async () => {
       context.journal.freeze()
-      const result = await callback(context.content)
+      let result
+      try {
+        result = await callback(context.content)
+      } catch (err) {
+        context.journal.unfreeze()
+        throw err
+      }
       context.journal.unfreeze()
       return result
     })
