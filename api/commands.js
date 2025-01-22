@@ -28,7 +28,6 @@ export async function migrate ({ cwd = process.cwd(), journal, logger }) {
 export async function test ({ cwd = process.cwd(), logger } = {}) {
   return Task.runTests({
     cwd,
-    journal,
     logger
   })
 }
