@@ -14,6 +14,7 @@ https://github.com/cgkineo/adapt-migrations/blob/master/api/commands.js
 Functions:
 * `describe(description, describeFunction)` Describe a migration
 * `whereContent(description, contentFilterFunction)` Limit when the migration runs, return true/false/throw Error
+* `whereStartPlugin(description, startPluginFilterFunction)` Limit when the migration runs, return true/false/throw Error
 * `whereFromPlugin(description, fromPluginFilterFunction)` Limit when the migration runs, return true/false/throw Error
 * `whereToPlugin(description, toPluginFilterFunction)` Limit when the migration runs, return true/false/throw Error
 * `mutateContent(contentFunction)` Change content, return true/false/throw Error
