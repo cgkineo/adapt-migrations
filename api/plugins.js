@@ -33,6 +33,7 @@ export function updatePlugin (description, config) {
 
       context.fromPlugins.forEach(plugin => {
         if (plugin.name !== config.name) return
+        plugin.startVersion = plugin.version
         plugin.version = config.version
         if (!config.framework) return
         plugin.framework = config.framework

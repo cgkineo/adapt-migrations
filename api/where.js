@@ -9,6 +9,24 @@ export function whereContent (description, callback) {
   }, { description, type: 'where' })
 };
 
+export function whereStartPlugin (description, callbackOrConfig) {
+  return deferOrRunWrap(({ fromPlugins }) => {
+    return successStopOrErrorWrap('whereStartPlugin', description, async () => {
+      const isCallback = (typeof callbackOrConfig === 'function')
+      if (isCallback) {
+        const callback = callbackOrConfig
+        return callback(fromPlugins)
+      }
+      const config = callbackOrConfig
+      return fromPlugins.some(plugin => {
+        if (config.name && plugin.name !== config.name) return false
+        if (config.version && !semver.satisfies(plugin.startVersion ?? plugin.version, config.version)) return false
+        return true
+      })
+    })
+  }, { description, type: 'where' })
+};
+
 export function whereFromPlugin (description, callbackOrConfig) {
   return deferOrRunWrap(({ fromPlugins }) => {
     return successStopOrErrorWrap('whereFromPlugin', description, async () => {
