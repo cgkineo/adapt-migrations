@@ -17,7 +17,7 @@ export function addPlugin (description, config) {
   return deferOrRunWrap(function (context) {
     return successStopOrErrorWrap('addPlugin', description, async () => {
       if (!description || !config) throw new Error('addPlugin - incorrectly configured')
-        if (!VERSION_CHECK.test(config.version)) throw new Error(`addPlugin - invalid version number ${config.version}`)
+      if (!VERSION_CHECK.test(config.version)) throw new Error(`addPlugin - invalid version number ${config.version}`)
 
       const newPlugin = context.toPlugins.find(plugin => (plugin.name === config.name))
       if (!newPlugin) throw new Error(`addPlugin - ${config.name} not found`)
