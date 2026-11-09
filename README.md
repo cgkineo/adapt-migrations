@@ -94,13 +94,13 @@ We define variables and steps in the definition phase of the migration script (t
 Tasks and steps have three results: success (true), stop (false) or error (throw Error). Using those return values and having some of the step functions marked up as "where" functions, we can selectively define and execute a variety of migrations scripts, for a variety of courses, with a fun array of predictable outcomes.
 
 References:
-Migration files are loaded: https://github.com/adaptlearning/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/lib/Task.js#L293-L296
-Capturing the description and callback of each describe function call to make a new task: https://github.com/adaptlearning/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/api/describe.js#L11
-Each of the describe blocks in the file are executed one by one: https://github.com/adaptlearning/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/lib/Task.js#L297-L302
-The step functions are executed and deferred: https://github.com/adaptlearning/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/api/where.js#L4-L10
-The step functions add themselves as tests or steps to the currently loading task: https://github.com/adaptlearning/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/lib/lifecycle.js#L23
-After the loading phase, on each run of the migrations scripts, applicable tasks are selected for execution until no more tasks can be executed: https://github.com/adaptlearning/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/lib/Task.js#L320-L323
-Tasks are applicable if all of their where steps come back success: https://github.com/adaptlearning/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/lib/Task.js#L184-L197
-The applicable tasks are run: https://github.com/adaptlearning/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/lib/Task.js#L330-L336
-The last success, stop or error step determines if the task failed or completed successfully or stopped because it wasn't applicable: https://github.com/adaptlearning/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/lib/lifecycle.js#L35-L41
-Here is checkContent, freezing the data and dealing with its result: https://github.com/adaptlearning/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/api/data.js#L13-L24
+Migration files are loaded: https://github.com/cgkineo/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/lib/Task.js#L293-L296
+Capturing the description and callback of each describe function call to make a new task: https://github.com/cgkineo/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/api/describe.js#L11
+Each of the describe blocks in the file are executed one by one: https://github.com/cgkineo/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/lib/Task.js#L297-L302
+The step functions are executed and deferred: https://github.com/cgkineo/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/api/where.js#L4-L10
+The step functions add themselves as tests or steps to the currently loading task: https://github.com/cgkineo/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/lib/lifecycle.js#L23
+After the loading phase, on each run of the migrations scripts, applicable tasks are selected for execution until no more tasks can be executed: https://github.com/cgkineo/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/lib/Task.js#L320-L323
+Tasks are applicable if all of their where steps come back success: https://github.com/cgkineo/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/lib/Task.js#L184-L197
+The applicable tasks are run: https://github.com/cgkineo/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/lib/Task.js#L330-L336
+The last success, stop or error step determines if the task failed or completed successfully or stopped because it wasn't applicable: https://github.com/cgkineo/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/lib/lifecycle.js#L35-L41
+Here is checkContent, freezing the data and dealing with its result: https://github.com/cgkineo/adapt-migrations/blob/1b156d8dad82f370c974f630adb3d58eaa8517b8/api/data.js#L13-L24
