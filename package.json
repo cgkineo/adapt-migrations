@@ -2,7 +2,7 @@
   "name": "adapt-migrations",
   "type": "module",
   "main": "index.js",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cgkineo/adapt-migrations.git"
